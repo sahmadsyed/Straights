@@ -13,4 +13,6 @@ public:
 	void pcMove();
 private:
 	GameController* controller;
+	std::vector<Player*>* players;
+	std::map<Suit, std::map<Rank, Card*>* >* table_cards; 
 };

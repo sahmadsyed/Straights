@@ -30,10 +30,10 @@ public:
 	void pcTurn();
 	void rageQuit();
 private:
-	std::vector<Player*> players;
+	std::vector<Player*>* players;
 	Card* cards_[52];
 	int current_turn;
-	std::map<Suit, std::map<Rank, Card*> > table_cards; 
+	std::map<Suit, std::map<Rank, Card*>* >* table_cards; 
 	static const std::string RANKS[13];
 	static const std::string SUITS[4];
 	static const int CARD_COUNT;

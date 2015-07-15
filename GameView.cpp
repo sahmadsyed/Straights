@@ -4,11 +4,15 @@
 #include "GameController.h"
 #include "Command.h"
 #include "BadInputException.h"
+#include "Player.h"
+#include "Card.h"
 
 using namespace std;
 
 GameView::GameView(int seed){
-	controller = new GameController(seed);
+	players = new std::vector<Player*>();
+	table_cards = new std::map<Suit, std::map<Rank, Card*> >();
+	controller = new GameController(seed, table_cards, players);
 }
 
 GameView::~GameView(){
