@@ -6,7 +6,7 @@
 
 enum Ptype{HUMAN, PC};
 
-class Player {
+class Player : public Subject{
 public:
 	Player(Ptype);
 	~Player();

@@ -2,7 +2,7 @@
 
 class GameController;
 
-class GameView {
+class GameView : public Observer{
 public:
 	GameView(int = 0);
 	~GameView();
@@ -11,6 +11,7 @@ public:
 	void startRound();
 	void humanMove();
 	void pcMove();
+	void update(); //TO-DO
 private:
 	GameController* controller;
 	std::vector<Player*>* players;

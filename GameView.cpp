@@ -13,6 +13,9 @@ GameView::GameView(int seed){
 	players = new std::vector<Player*>();
 	table_cards = new std::map<Suit, std::map<Rank, Card*> >();
 	controller = new GameController(seed, table_cards, players);
+	for(vector<Player*>::iterator it = players->begin(); it != players->end(); ++it){
+		(*it)->subscribe(this);
+	}
 }
 
 GameView::~GameView(){
