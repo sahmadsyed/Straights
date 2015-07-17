@@ -22,6 +22,6 @@ Card* HumanPlayer::getPlay(Card c){
 Card* HumanPlayer::getDiscard(Card c){
 	vector<Card*> hcards = getHandCards();
 	for(int i = 0; i < hcards.size(); i++){
-                if((hcards[i])&&(c == *hcards[i])) return hcards[i];
-        }
+		if((hcards[i])&&(c == *hcards[i])) return hcards[i];
+	}
 }

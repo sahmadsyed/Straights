@@ -22,10 +22,10 @@ Card* PCPlayer::getPlay(Card c){
 Card* PCPlayer::getDiscard(Card c){
 	Card* discard;
 	vector<Card*> hcards = getHandCards();
-        for(int i = 0; i < hcards.size(); i++){
+    for(int i = 0; i < hcards.size(); i++){
 		if(hcards[i]) {
-                	discard = hcards[i]; 
+			discard = hcards[i]; 
 			return discard;
-                }
-        }
+		}
+	}
 }

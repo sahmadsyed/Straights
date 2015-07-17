@@ -33,13 +33,18 @@ Glib::RefPtr<Gdk::Pixbuf> createPixbuf(const string & name) {
 GameView::GameView() : seed_entry(), start_game_button("Start new game with seed:"), player_1_rage("Rage!"), player_2_rage("Rage!"), player_3_rage("Rage!"), player_4_rage("Rage!"), end_game_button("End current game"), table(18, 13, false), table_cards_label("Cards on the table"), hand_cards_label("Your hand") {
 	controller = new GameController(players, table_cards);
 	invitePlayers();
+
+	// subscribe to models
 	for(vector<Player*>::iterator it = players->begin(); it != players->end(); ++it){
 		(*it)->subscribe(this);
 	}
 	table_cards->subscribe(this);
+
 	transform(&IMAGE_NAMES[0], &IMAGE_NAMES[G_N_ELEMENTS(IMAGE_NAMES)], 
 			   std::back_inserter(deck), &createPixbuf);
 	controller->deal();
+
+	// initialize GUI
 	initGUI();
 	startMove();
 }
@@ -61,23 +66,23 @@ void GameView::onQuitClicked(){
 }
 
 void GameView::onStartClicked(){
+	// start new game with specified seed
 	int seed = stoi(seed_entry.get_text());
 	players = NULL; table_cards = NULL;
 	GameController* temp = controller;
 	controller = new GameController(players, table_cards, seed);	
 	invitePlayers();
-        for(vector<Player*>::iterator it = players->begin(); it != players->end(); ++it){
-                (*it)->subscribe(this);
-        }
-        table_cards->subscribe(this);
-        transform(&IMAGE_NAMES[0], &IMAGE_NAMES[G_N_ELEMENTS(IMAGE_NAMES)],
-                           std::back_inserter(deck), &createPixbuf);
-        controller->deal();
-        update(); 
-        startMove();
+    for(vector<Player*>::iterator it = players->begin(); it != players->end(); ++it){
+		(*it)->subscribe(this);
+    }
+    table_cards->subscribe(this);
+    transform(&IMAGE_NAMES[0], &IMAGE_NAMES[G_N_ELEMENTS(IMAGE_NAMES)],
+                       std::back_inserter(deck), &createPixbuf);
+    controller->deal();
+    update(); 
+    startMove();
 	delete temp;
 }
-
 
 void GameView::onRageClicked(){
 	controller->rageQuit();
@@ -95,36 +100,41 @@ void GameView::invitePlayers(){
 
 void GameView::startMove(){
 	if(controller->emptyDeck()){
+		// determine scores and if any winner(s)
 		bool end_game_check = false;
-        	vector<int> winners;
-        	int lowest_score = -1;
-        	string message = "ROUND RESULTS\n\n";
+    	vector<int> winners;
+    	int lowest_score = -1;
+    	string message = "ROUND RESULTS\n\n";
 		for(int i = 0; i < players->size(); i++){
-                	Player* p = players->at(i);
+        	Player* p = players->at(i);
 			message += "Player " + to_string(i + 1) +  "'s discards:\n";
-                	for(int j = 0; j < p->getDiscards().size(); j++){
-                     	message += "- " + controller->getRank((int)(p->getDiscards()[j])->getRank())  + controller->getSuit((int)(p->getDiscards()[j])->getSuit()).substr(0,1) + "\n";
-                	}
-                	int total_score = p->getOldScore() + p->getScore();
-                	if((lowest_score == -1)||(total_score < lowest_score)){
-                        	winners.clear();
-                        	winners.push_back(i + 1);
-                        	lowest_score = total_score;
-                	}else if(total_score == lowest_score){
-                        	winners.push_back(i + 1);
-                	}
-                	if(total_score >= 80) end_game_check = true;
-                	message +=  "Player " + to_string(i + 1) +  "'s score: " + to_string(p->getOldScore()) +  " + " + to_string(p->getScore()) + " = " + to_string(total_score) + "\n\n";
+        	for(int j = 0; j < p->getDiscards().size(); j++){
+             	message += "- " + controller->getRank((int)(p->getDiscards()[j])->getRank())  + controller->getSuit((int)(p->getDiscards()[j])->getSuit()).substr(0,1) + "\n";
         	}
-			MsgDialogbox stats(*this, message);
-        	if(end_game_check){
+        	int total_score = p->getOldScore() + p->getScore();
+        	if((lowest_score == -1)||(total_score < lowest_score)){
+            	winners.clear();
+            	winners.push_back(i + 1);
+            	lowest_score = total_score;
+        	}else if(total_score == lowest_score){
+                winners.push_back(i + 1);
+        	}
+        	if(total_score >= 80) end_game_check = true;
+        	message +=  "Player " + to_string(i + 1) +  "'s score: " + to_string(p->getOldScore()) +  " + " + to_string(p->getScore()) + " = " + to_string(total_score) + "\n\n";
+        }
+
+        // display round results
+		MsgDialogbox stats(*this, message);
+
+		// declare winner(s) and end game
+    	if(end_game_check){
 			string win_msg = "";
-                	for(vector<int>::iterator it = winners.begin(); it != winners.end(); ++it){
+        	for(vector<int>::iterator it = winners.begin(); it != winners.end(); ++it){
 				win_msg += "Player " + to_string(*it) +  " wins!\n";
-                	}
+        	}
 			MsgDialogbox win(*this, win_msg);
-                	exit(1);
-        	}	
+        	exit(1);
+    	}	
 		controller->endOfRound();
 		table_cards->clearTable();
 		return startMove();
@@ -153,6 +163,8 @@ Glib::RefPtr<Gdk::Pixbuf> GameView::getNullCardImage() {
 void GameView::onCardButtonClicked(Glib::ustring a){
 	int index = stoi(a);
 	int turn = controller->getCurrentTurn();
+	
+	// verify card selected is legal
 	try{
 		controller->select(*(players->at(turn)->getHandCards()[index]));
 	}catch(BadInputException& e){
@@ -165,20 +177,24 @@ void GameView::onCardButtonClicked(Glib::ustring a){
 
 void GameView::initGUI(){
 	seed_entry.set_text("0");
-	end_game_button.signal_clicked().connect( sigc::mem_fun( *this, &GameView::onQuitClicked ) );
-
-	start_game_button.signal_clicked().connect(sigc::mem_fun( *this, &GameView::onStartClicked));
+	end_game_button.signal_clicked().connect( sigc::mem_fun(*this, &GameView::onQuitClicked));
+	start_game_button.signal_clicked().connect(sigc::mem_fun(*this, &GameView::onStartClicked));
 	const Glib::RefPtr<Gdk::Pixbuf> nullCardPixbuf = getNullCardImage();
+
 	set_border_width(10);
+
+	// specifiy frame specs
 	frame.set_label_align( Gtk::ALIGN_CENTER, Gtk::ALIGN_TOP );
 	frame.set_shadow_type( Gtk::SHADOW_ETCHED_OUT );
 	add(frame);
 
+	// add table to frame
 	frame.add(table);
 	table.attach(start_game_button, 0, 4, 0, 1);
 	table.attach(seed_entry, 4, 9, 0, 1);
 	table.attach(end_game_button, 9, 13, 0, 1);
 
+	// initialize table cards with empty table
     table.attach(table_cards_label, 0,13,1,2, Gtk::FILL, Gtk::FILL, 2, 2 );
 	for(int s = 0; s < 4; s++){
 		for(int r = 0; r < 13; r++){
@@ -187,48 +203,36 @@ void GameView::initGUI(){
 		}
 	}
 
-	Glib::RefPtr<Gtk::TextBuffer> player_1_info = Gtk::TextBuffer::create();
-    player_1_info->set_text("Player 1 Stats\nPoints: 0\nDiscards: 0");
-	player_1_text.set_buffer(player_1_info);
+	// create player stat textbox and rage quit buttons
 	table.attach(player_1_text, 0,3.25,6,7, Gtk::FILL, Gtk::FILL, 2, 2 );
 	player_1_rage.signal_clicked().connect( sigc::mem_fun( *this, &GameView::onRageClicked ) );
 	table.attach(player_1_rage, 0, 3, 7, 8);	
-
-	Glib::RefPtr<Gtk::TextBuffer> player_2_info = Gtk::TextBuffer::create();
-	player_2_info->set_text("Player 2 Stats\nPoints: 0\nDiscards: 0");
-	player_2_text.set_buffer(player_2_info);
 	table.attach(player_2_text, 3.25,6.5,6,7, Gtk::FILL, Gtk::FILL, 2, 2 );
 	player_2_rage.signal_clicked().connect( sigc::mem_fun( *this, &GameView::onRageClicked ) );
 	table.attach(player_2_rage, 3, 6, 7, 8);
-
-	Glib::RefPtr<Gtk::TextBuffer> player_3_info = Gtk::TextBuffer::create();
-	player_3_info->set_text("Player 3 Stats\nPoints: 0\nDiscards: 0");
-	player_3_text.set_buffer(player_3_info);
 	table.attach(player_3_text, 6.5,9.75,6,7, Gtk::FILL, Gtk::FILL, 2, 2 );
 	player_3_rage.signal_clicked().connect( sigc::mem_fun( *this, &GameView::onRageClicked ) );
 	table.attach(player_3_rage, 6, 9, 7, 8);
-
-	Glib::RefPtr<Gtk::TextBuffer> player_4_info = Gtk::TextBuffer::create();
-	player_4_info->set_text("Player 4 Stats\nPoints: 0\nDiscards: 0");
-	player_4_text.set_buffer(player_4_info);
 	table.attach(player_4_text, 9.75,13,6,7, Gtk::FILL, Gtk::FILL, 2, 2 );
 	player_4_rage.signal_clicked().connect( sigc::mem_fun( *this, &GameView::onRageClicked ) );
 	table.attach(player_4_rage, 9, 13, 7, 8);
-
-	//table.attach(hand_cards_label, 0, 13 , 9, 10, Gtk::FILL, Gtk::FILL, 2, 2 );
 	
+	// initialize hand cards with empty hand
 	for(int i = 0; i < 13; i++){
 		hand_cards[i] = new Gtk::Image(nullCardPixbuf);
 		hand_card_buttons[i] = NULL;
 		table.attach(*hand_cards[i], i, i + 1, 8, 9, Gtk::FILL, Gtk::FILL, 2, 2);
     }		
 	table.attach(hand_cards_label, 0, 13 , 9, 10, Gtk::FILL, Gtk::FILL, 2, 2 );
+
 	show_all();
 	update();
 }
 
 void GameView::update(){	
 	const Glib::RefPtr<Gdk::Pixbuf> nullCardPixbuf = getNullCardImage();
+
+	// update table cards
 	for(int s = 0; s < 4; s++){
 		for(int r = 0; r < 13; r++){
 			table.remove(*(table_card_images[s*13 + r]));
@@ -240,18 +244,21 @@ void GameView::update(){
 			}
 			table.attach(*table_card_images[s*13 + r], r, r+1, s+2,s+3, Gtk::FILL, Gtk::FILL, 2, 2);
 		}
-	}	
+	}
+
 	int turn = controller->getCurrentTurn();
+
+	// update score, discards, and rage button sensitivity for each player
+	// Player 1
 	table.remove(player_1_text);
 	Glib::RefPtr<Gtk::TextBuffer> player_1_info = Gtk::TextBuffer::create();
     player_1_info->set_text("Player 1 Stats\nPoints: " + to_string(players->at(0)->getScore()) + "\nDiscards: " + to_string(players->at(0)->getDiscards().size()));
 	player_1_text.set_buffer(player_1_info);
-
 	table.attach(player_1_text, 0,3.25,6,7, Gtk::FILL, Gtk::FILL, 2, 2 );
-
     if((turn != 0)||(players->at(turn)->getType() == PC)) player_1_rage.set_sensitive(false);
     else player_1_rage.set_sensitive(true);
 
+    // Player 2
     table.remove(player_2_text);
 	Glib::RefPtr<Gtk::TextBuffer> player_2_info = Gtk::TextBuffer::create();
 	player_2_info->set_text("Player 2 Stats\nPoints: " + to_string(players->at(1)->getScore()) + "\nDiscards: " + to_string(players->at(1)->getDiscards().size()));
@@ -260,17 +267,16 @@ void GameView::update(){
 	if((turn != 1)||(players->at(turn)->getType() == PC))  player_2_rage.set_sensitive(false);
 	else player_2_rage.set_sensitive(true);
 
+	// Player 3
 	table.remove(player_3_text);
 	Glib::RefPtr<Gtk::TextBuffer> player_3_info = Gtk::TextBuffer::create();
-
-
-
 	player_3_info->set_text("Player 3 Stats\nPoints: " + to_string(players->at(2)->getScore()) + "\nDiscards: " + to_string(players->at(2)->getDiscards().size()));
 	player_3_text.set_buffer(player_3_info);
 	table.attach(player_3_text, 6.5,9.75,6,7, Gtk::FILL, Gtk::FILL, 2, 2 );
 	if((turn != 2)||(players->at(turn)->getType() == PC)) player_3_rage.set_sensitive(false);
 	else player_3_rage.set_sensitive(true);
 
+	// Player 4
 	table.remove(player_4_text);
 	Glib::RefPtr<Gtk::TextBuffer> player_4_info = Gtk::TextBuffer::create();
 	player_4_info->set_text("Player 4 Stats\nPoints: " + to_string(players->at(3)->getScore()) + "\nDiscards: " + to_string(players->at(3)->getDiscards().size()));
@@ -281,12 +287,11 @@ void GameView::update(){
 	Player* p = players->at(turn);
 	vector<Card*> hcards = p->getHandCards();
 	
+	// update hand cards of current player
 	for(int i = 0; i < 13; i++){
 		if(hand_card_buttons[i]){
-                
-                                table.remove(*(hand_card_buttons[i]));
-                
-                        }else table.remove(*(hand_cards[i]));
+			table.remove(*(hand_card_buttons[i]));
+		}else table.remove(*(hand_cards[i]));
 		if(hcards[i]){
 			int r = hcards[i]->getRank();
 			int s = hcards[i]->getSuit();
@@ -302,6 +307,7 @@ void GameView::update(){
 			table.attach(*hand_cards[i], i, i + 1, 8, 9, Gtk::FILL, Gtk::FILL, 2, 2);
         }
     }
+
 	show_all();
 }
 

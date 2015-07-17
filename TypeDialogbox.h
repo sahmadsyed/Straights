@@ -1,11 +1,13 @@
 #ifndef TYPE_DIALOG_BOX_H
 #define TYPE_DIALOG_BOX_H
+
 #include <gtkmm/dialog.h>
 #include <gtkmm/box.h>
 #include <gtkmm/radiobuttongroup.h>
 #include <gtkmm/radiobutton.h>
 #include <string>
 #include <vector>
+
 using std::string;
 using std::vector;
 

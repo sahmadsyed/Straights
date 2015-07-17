@@ -21,6 +21,7 @@ const int GameController::CARD_COUNT = 52;
 GameController::GameController(vector<Player*>* &players_, TableCards* &table, int shuffle_seed)
 {
 	seed = shuffle_seed;
+	new_game = true;
 	cards_left = CARD_COUNT;
 	current_turn = 0;
 	empty_table = true;
@@ -48,7 +49,6 @@ GameController::~GameController(){
 	}
 	delete players;
 	for(int i = 0; i < CARD_COUNT; i++){
-		cout << i << endl;
 		delete cards_[i];
 	}
 }
@@ -198,18 +198,18 @@ void GameController::quit() const{
 
 void GameController::shuffle(){
 	static mt19937 rng(seed);
-	rng.seed(seed);
+	if(new_game){
+		 rng.seed(seed);
+		 new_game = false;
+	}
 	int n = CARD_COUNT;
-	cout << "SALMAN " << seed << endl;
 	while ( n > 1 ) {
 		int k = (int) (rng() % n);
-		cout << k << endl;
 		--n;
 		Card *c = cards_[n];
 		cards_[n] = cards_[k];
 		cards_[k] = c;
 	}
-	cout << "FAIZAN" << endl;
 }
 
 int GameController::getCurrentTurn(){

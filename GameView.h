@@ -1,3 +1,6 @@
+#ifndef GAME_VIEW_H
+#define GAME_VIEW_H
+
 #include <glibmm/ustring.h>
 #include <gtkmm/label.h>
 #include <vector>
@@ -27,16 +30,17 @@ public:
 	GameView();
 	~GameView();
 	void invitePlayers();
-	void startMove();
-	void pcMove();
 	void update();
 	Glib::RefPtr<Gdk::Pixbuf> getCardImage(Rank, Suit);
 	Glib::RefPtr<Gdk::Pixbuf> getNullCardImage();
 	void onCardButtonClicked(Glib::ustring a);
 	void onQuitClicked();
 	void onStartClicked();
-	void initGUI();
 	void onRageClicked();
+protected:
+	void initGUI();
+	void pcMove();
+	void startMove();
 private:
 	GameController* controller;
 	std::vector<Player*>* players;
@@ -63,3 +67,5 @@ private:
 	Gtk::Label table_cards_label;
 	Gtk::Label hand_cards_label;	
 };
+
+#endif

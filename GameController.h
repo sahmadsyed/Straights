@@ -42,6 +42,7 @@ private:
 	bool empty_table;
 	int cards_left;
 	int seed;
+	bool new_game;
 };
 
 #endif
