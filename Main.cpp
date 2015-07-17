@@ -1,13 +1,12 @@
 #include "GameView.h"
 #include <stdlib.h>
 #include <iostream>
+#include <gtkmm/main.h>
 using namespace std;
 
-int main(int argc, char* argv[]){
-	GameView *game;
-	if(argc >= 2) game = new GameView(atoi(argv[1]));
-	else game = new GameView();
-	game->start();	
-	delete game;
+int main(int argc, char* argv[]){	
+	Gtk::Main kit(argc, argv);
+	GameView game;
+	Gtk::Main::run(game);
 	return 0;
 }

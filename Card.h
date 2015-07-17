@@ -3,6 +3,7 @@
 
 #include <ostream>
 #include <istream>
+#include "Subject.h"
 
 enum Suit { CLUB, DIAMOND, HEART, SPADE, SUIT_COUNT };
 enum Rank { ACE, TWO, THREE, FOUR, FIVE, SIX, SEVEN,

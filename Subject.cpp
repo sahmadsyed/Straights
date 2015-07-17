@@ -1,4 +1,7 @@
 #include "Subject.h"
+#include <vector>
+
+using namespace std;
 
 Subject::Subject(){}
 
@@ -11,7 +14,7 @@ void Subject::subscribe(Observer* o){
 }
 
 void Subject::notify(){
-	for(vector<Observers*>::iterator it = observers.begin(); it != observers.end(); ++it){
+	for(vector<Observer*>::iterator it = observers.begin(); it != observers.end(); ++it){
 		(*it)->update();
 	}
 }

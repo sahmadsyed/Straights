@@ -1,3 +1,6 @@
+#ifndef SUBJECT_H
+#define SUBJECT_H
+
 #include "Observer.h"
 #include <vector>
 
@@ -9,5 +12,7 @@ public:
 protected:
 	void notify();
 private:
-	vector<Observers*> observers;
+	std::vector<Observer*> observers;
 };
+
+#endif

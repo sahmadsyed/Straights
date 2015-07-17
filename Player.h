@@ -3,6 +3,7 @@
 
 #include <vector>
 #include "Card.h"
+#include "Subject.h"
 
 enum Ptype{HUMAN, PC};
 
@@ -28,6 +29,7 @@ public:
 	void resetScore(); 	
 	virtual	Card* getPlay(Card c) = 0;
 	virtual Card* getDiscard(Card c) = 0;
+	void newMove();
 private:
 	Ptype player_type;
 	std::vector<Card*> hand_cards;

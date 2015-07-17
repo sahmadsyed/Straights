@@ -6,34 +6,36 @@
 #include <map>
 #include "Card.h"
 #include "Player.h"
+#include "TableCards.h"
 
 class GameController {
 public:
-	GameController(int);
+	GameController(std::vector<Player*>*&, TableCards*&, int = 0);
 	~GameController();
 	void addPlayer(std::string);
-	void deal(int&);
-	void shuffle();
+	void deal();
 	void newMove();
-	void printTableCards();
-	void printPlayerHand() const;
-	void processLegalPlays(bool = true);
-	void play(Card);
-	Card* findCard(Suit, Rank);
-	void addToTable(Card*);
-	void discard(Card c);
-	void printDeck() const;
+	void processLegalPlays();
 	void quit() const;
 	bool emptyDeck();
 	void endOfRound();
 	bool humanCheck() const;
 	void pcTurn();
 	void rageQuit();
+	int getCurrentTurn();
+	void select(Card);
+	std::string getRank(int);
+	std::string getSuit(int);
+protected:
+	void shuffle();
+	Card* findCard(Suit, Rank);
+	void play(Card);
+	void discard(Card c);
 private:
 	std::vector<Player*>* players;
 	Card* cards_[52];
 	int current_turn;
-	std::map<Suit, std::map<Rank, Card*>* >* table_cards; 
+	TableCards* table_cards; 
 	static const std::string RANKS[13];
 	static const std::string SUITS[4];
 	static const int CARD_COUNT;

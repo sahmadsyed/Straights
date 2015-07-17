@@ -3,6 +3,7 @@
 #include "BadInputException.h"
 #include <vector>
 #include <string>
+#include <iostream>
 
 using namespace std;
 
@@ -15,16 +16,12 @@ Card* HumanPlayer::getPlay(Card c){
 	for(int i = 0; i < legals.size(); i++){
 		if(c == *legals[i]) return legals[i];
 	}
-	throw BadInputException("This is not a legal play."); 
+	throw BadInputException("You are holding legal play(s) and this isn't one of them"); 
 }
 
 Card* HumanPlayer::getDiscard(Card c){
-	vector<Card*> legals = getLegalMoves();
-	if(!(legals.empty())){
-		throw BadInputException("You have a legal play. You may not discard.");
-        }
 	vector<Card*> hcards = getHandCards();
 	for(int i = 0; i < hcards.size(); i++){
-                if(c == *hcards[i]) return hcards[i];
+                if((hcards[i])&&(c == *hcards[i])) return hcards[i];
         }
 }

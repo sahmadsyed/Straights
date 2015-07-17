@@ -65,7 +65,7 @@ void Player::removeFromHand(Card* c){
 			index = i; break;
 		}
 	}
-	hand_cards[index] = NULL;
+	hand_cards[index] = NULL;	
 }
 
 int Player::getScore() const{
@@ -96,4 +96,8 @@ int Player::getOldScore() const{
 
 void Player::clearHandCards(){
 	hand_cards.clear();
+}
+
+void Player::newMove(){
+	notify();
 }
